@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calendar, Upload } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import PostScheduler from '@/components/schedule/PostScheduler';
 import QueueList from '@/components/schedule/QueueList';
+import TimeConfigList from '@/components/schedule/TimeConfigList';
 
 interface Post {
   id: string;
@@ -43,8 +43,7 @@ const Schedule = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        {/* Left side - Post creation */}
+      <div className="grid grid-cols-[1fr_2fr] gap-6">
         <div className="space-y-4">
           <Card className="neumorphic p-6">
             <div className="space-y-4">
@@ -85,11 +84,14 @@ Use double line breaks to separate multiple posts for bulk upload."
               </div>
             </div>
           </Card>
+          
+          <TimeConfigList />
         </div>
 
-        {/* Right side - Queue list */}
-        <div>
-          <QueueList posts={posts} />
+        <div className="h-full">
+          <Card className="neumorphic h-full">
+            <QueueList posts={posts} />
+          </Card>
         </div>
       </div>
     </div>

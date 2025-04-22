@@ -1,6 +1,6 @@
 
 import { format } from 'date-fns';
-import { Card } from '@/components/ui/card';
+import { List } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -21,11 +21,17 @@ const QueueList = ({ posts }: QueueListProps) => {
   });
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-primary">Queue</h2>
-      <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+    <div className="p-6 h-full">
+      <h2 className="text-lg font-semibold text-primary flex items-center gap-2 mb-4">
+        <List className="h-5 w-5" />
+        Queue
+      </h2>
+      <div className="space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
         {sortedPosts.map((post) => (
-          <Card key={post.id} className="neumorphic p-4">
+          <div
+            key={post.id}
+            className="p-4 rounded-md bg-secondary/10 border border-border"
+          >
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1">
                 <p className="text-sm text-foreground whitespace-pre-wrap">
@@ -47,7 +53,7 @@ const QueueList = ({ posts }: QueueListProps) => {
                 )}
               </div>
             </div>
-          </Card>
+          </div>
         ))}
         {posts.length === 0 && (
           <div className="text-center text-muted-foreground py-8">
