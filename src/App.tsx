@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import Index from "./pages/Index";
 import Schedule from "./pages/Schedule";
+import History from "./pages/History";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/schedule" element={<Schedule />} />
+            <Route path="/history" element={<History />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

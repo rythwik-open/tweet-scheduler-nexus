@@ -1,34 +1,30 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Home, Calendar, BarChart2, LogOut } from 'lucide-react';
+import { Menu, Home, Calendar, Clock, BarChart2 } from 'lucide-react';
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <div className="min-h-screen">
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-full bg-background transition-all duration-300 z-30 neumorphic border-r border-border ${
           isExpanded ? 'w-64' : 'w-20'
         }`}
       >
-        {/* Logo */}
         <div className="h-20 flex items-center justify-center">
           <div className="neumorphic p-3 rounded-full">
             <Menu className="h-6 w-6 text-primary" />
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="mt-8 px-3 space-y-6">
           <NavItem icon={Home} label="Dashboard" to="/" expanded={isExpanded} />
           <NavItem icon={Calendar} label="Schedule" to="/schedule" expanded={isExpanded} />
+          <NavItem icon={Clock} label="History" to="/history" expanded={isExpanded} />
           <NavItem icon={BarChart2} label="Analytics" to="/analytics" expanded={isExpanded} />
         </nav>
 
-        {/* Bottom items */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
@@ -39,9 +35,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className={`transition-all duration-300 ${isExpanded ? 'ml-64' : 'ml-20'}`}>
-        {/* Header */}
         <header className="h-20 fixed top-0 right-0 left-0 bg-background z-20 flex items-center px-6">
           <div className={`transition-all duration-300 ${isExpanded ? 'ml-64' : 'ml-20'}`}>
             <div className="neumorphic p-3 rounded-xl inline-flex items-center gap-3">
@@ -58,7 +52,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        {/* Page content */}
         <div className="pt-24 px-6 pb-6">{children}</div>
       </main>
     </div>
