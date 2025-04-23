@@ -48,14 +48,18 @@
 
 @layer utilities {
   .neumorphic {
-    @apply bg-background rounded-[20px] shadow-[4px_4px_8px_#0f0f0f,-4px_-4px_8px_#252525];
+    @apply bg-background rounded-[10px] shadow-[4px_4px_8px_#0f0f0f,-4px_-4px_8px_#252525];
   }
   
   .neumorphic-inset {
-    @apply bg-background rounded-[16px] shadow-[inset_4px_4px_8px_#0f0f0f,inset_-4px_-4px_8px_#252525];
+    @apply bg-background rounded-[10px] shadow-[inset_4px_4px_8px_#0f0f0f,inset_-4px_-4px_8px_#252525];
   }
   
   .pressed {
     @apply shadow-[inset_4px_4px_8px_#0f0f0f,inset_-4px_-4px_8px_#252525] transition-shadow duration-100;
+  }
+
+  .button-inflated {
+    @apply transform transition-all duration-200 active:scale-95 hover:scale-105;
   }
 }
