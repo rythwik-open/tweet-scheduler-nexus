@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Home, Calendar, Clock, BarChart2 } from 'lucide-react';
@@ -66,7 +65,7 @@ const NavItem = ({ icon: Icon, label, to, expanded }: NavItemProps) => {
   return (
     <Link
       to={to}
-      className="neumorphic p-3 rounded-lg flex items-center text-primary hover:opacity-80 transition-opacity button-inflated active:pressed"
+      className="neumorphic p-3 rounded-full flex items-center justify-center text-primary hover:opacity-80 transition-opacity button-inflated active:pressed"
     >
       <Icon className="h-5 w-5" />
       {expanded && <span className="ml-3 text-sm">{label}</span>}
@@ -75,4 +74,3 @@ const NavItem = ({ icon: Icon, label, to, expanded }: NavItemProps) => {
 };
 
 export default MainLayout;
-
