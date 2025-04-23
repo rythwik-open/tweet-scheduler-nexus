@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Menu, Home, Calendar, Clock, BarChart2 } from 'lucide-react';
+import NavItem from './NavItem';
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -51,25 +51,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="pt-24 px-6 pb-6">{children}</div>
       </main>
     </div>
-  );
-};
-
-interface NavItemProps {
-  icon: React.ElementType;
-  label: string;
-  to: string;
-  expanded: boolean;
-}
-
-const NavItem = ({ icon: Icon, label, to, expanded }: NavItemProps) => {
-  return (
-    <Link
-      to={to}
-      className="neumorphic p-3 rounded-full flex items-center justify-center text-primary hover:opacity-80 transition-opacity button-inflated active:pressed"
-    >
-      <Icon className="h-5 w-5" />
-      {expanded && <span className="ml-3 text-sm">{label}</span>}
-    </Link>
   );
 };
 
