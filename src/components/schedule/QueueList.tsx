@@ -30,7 +30,7 @@ const QueueList = ({ posts }: QueueListProps) => {
         {sortedPosts.map((post) => (
           <div
             key={post.id}
-            className="p-4 rounded-md bg-secondary/10 border border-border"
+            className="p-4 rounded-lg neumorphic"
           >
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1">

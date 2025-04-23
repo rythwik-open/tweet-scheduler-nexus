@@ -51,7 +51,7 @@ const TimeConfigList = () => {
   };
 
   return (
-    <Card className="neumorphic p-6">
+    <Card className="neumorphic p-6 border-0">
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
           <Clock className="h-5 w-5" />
@@ -60,7 +60,7 @@ const TimeConfigList = () => {
         
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full flex items-center gap-2">
+            <Button variant="outline" className="w-full neumorphic rounded-full active:pressed">
               <Plus className="h-4 w-4" />
               Add Time Trigger
             </Button>
@@ -77,9 +77,10 @@ const TimeConfigList = () => {
                   type="time"
                   value={newTime}
                   onChange={(e) => setNewTime(e.target.value)}
+                  className="neumorphic-inset"
                 />
               </div>
-              <Button onClick={handleAddConfig} className="w-full">
+              <Button onClick={handleAddConfig} className="w-full neumorphic rounded-full active:pressed">
                 Add Time
               </Button>
             </div>
@@ -90,12 +91,12 @@ const TimeConfigList = () => {
           {configs.map((config) => (
             <div
               key={config.id}
-              className="flex items-center justify-between p-2 rounded-md bg-card border"
+              className="flex items-center justify-between p-2 rounded-lg neumorphic"
             >
               <span className="text-sm">{config.time}</span>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="neumorphic rounded-full active:pressed">
                     <Pen className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
@@ -116,11 +117,12 @@ const TimeConfigList = () => {
                             time: e.target.value
                           })
                         }
+                        className="neumorphic-inset"
                       />
                     </div>
                     <Button 
                       onClick={() => handleEditConfig(config)} 
-                      className="w-full"
+                      className="w-full neumorphic rounded-full active:pressed"
                     >
                       Save Changes
                     </Button>

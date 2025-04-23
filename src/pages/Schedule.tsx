@@ -45,20 +45,20 @@ const Schedule = () => {
 
       <div className="grid grid-cols-[1fr_2fr] gap-6">
         <div className="space-y-4">
-          <Card className="neumorphic p-6">
+          <Card className="neumorphic p-6 border-0">
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-primary">Create Posts</h2>
               <Textarea
                 placeholder="Enter your post content here... 
 Use double line breaks to separate multiple posts for bulk upload."
-                className="min-h-[200px] text-foreground"
+                className="min-h-[200px] text-foreground neumorphic-inset"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               />
               <div className="flex gap-3">
                 <Button 
                   onClick={handlePostNow}
-                  className="flex items-center gap-2"
+                  className="neumorphic rounded-full active:pressed"
                 >
                   <Upload className="h-4 w-4" />
                   Post Now
@@ -89,7 +89,7 @@ Use double line breaks to separate multiple posts for bulk upload."
         </div>
 
         <div className="h-full">
-          <Card className="neumorphic h-full">
+          <Card className="neumorphic h-full border-0">
             <QueueList posts={posts} />
           </Card>
         </div>

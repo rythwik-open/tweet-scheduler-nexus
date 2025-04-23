@@ -23,14 +23,14 @@ const PostScheduler = ({ content, onSchedule }: PostSchedulerProps) => {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="flex items-center gap-2"
+          className="neumorphic rounded-full active:pressed"
           disabled={!content.trim()}
         >
           <Calendar className="h-4 w-4" />
           Schedule Post
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0 neumorphic border-0" align="start">
         <div className="p-3">
           <CalendarComponent
             mode="single"
