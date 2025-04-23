@@ -60,7 +60,7 @@ const TimeConfigList = () => {
         
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full neumorphic rounded-full active:pressed">
+            <Button className="w-full neumorphic rounded-full active:pressed">
               <Plus className="h-4 w-4" />
               Add Time Trigger
             </Button>

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Calendar, Upload } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -59,6 +60,7 @@ Use double line breaks to separate multiple posts for bulk upload."
                 <Button 
                   onClick={handlePostNow}
                   className="neumorphic rounded-full active:pressed"
+                  variant="outline"
                 >
                   <Upload className="h-4 w-4" />
                   Post Now

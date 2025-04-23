@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Menu, Home, Calendar, Clock, BarChart2 } from 'lucide-react';
 import NavItem from './NavItem';
@@ -15,7 +16,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="h-20 flex items-center justify-center">
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="neumorphic p-3 rounded-lg button-inflated active:pressed"
+            className="neumorphic p-3 rounded-lg active:pressed"
           >
             <Menu className="h-6 w-6 text-primary" />
           </button>
@@ -32,7 +33,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <main className={`transition-all duration-300 ${isExpanded ? 'ml-64' : 'ml-20'}`}>
         <header className="h-20 fixed top-0 right-0 left-0 bg-background z-20 flex items-center justify-end px-6">
           <div className={`transition-all duration-300`}>
-            <div className="neumorphic p-3 rounded-lg button-inflated">
+            <div className="neumorphic p-3 rounded-lg active:pressed">
               <div className="flex items-center gap-3">
                 <img
                   src="https://pbs.twimg.com/profile_images/1841778545925767168/rNZJA_j5_400x400.jpg"
