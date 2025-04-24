@@ -1,4 +1,3 @@
-
 import { Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,8 +21,7 @@ const PostScheduler = ({ content, onSchedule }: PostSchedulerProps) => {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          className="neumorphic rounded-full active:pressed"
+          className="neumorphic rounded-full active:pressed text-accent-foreground border-0"
           disabled={!content.trim()}
         >
           <Calendar className="h-4 w-4" />

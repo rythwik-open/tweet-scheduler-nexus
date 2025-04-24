@@ -1,4 +1,3 @@
-
 import { Card } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 
@@ -15,7 +14,7 @@ const History = () => {
         </div>
       </div>
 
-      <Card className="neumorphic p-6">
+      <Card className="neumorphic p-6 border-0">
         <div className="space-y-6">
           <p className="text-center text-muted-foreground py-8">
             No tweets have been posted yet

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calendar, Upload } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -52,15 +51,14 @@ const Schedule = () => {
               <Textarea
                 placeholder="Enter your post content here... 
 Use double line breaks to separate multiple posts for bulk upload."
-                className="min-h-[200px] text-foreground neumorphic-inset"
+                className="min-h-[200px] text-foreground neumorphic-inset border-0"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               />
               <div className="flex gap-3">
                 <Button 
                   onClick={handlePostNow}
-                  className="neumorphic rounded-full active:pressed"
-                  variant="outline"
+                  className="neumorphic rounded-full active:pressed text-accent-foreground border-0"
                 >
                   <Upload className="h-4 w-4" />
                   Post Now
