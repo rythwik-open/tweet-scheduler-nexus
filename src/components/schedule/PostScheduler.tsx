@@ -12,17 +12,18 @@ import { useState } from 'react';
 
 interface PostSchedulerProps {
   content: string;
-  onSchedule: (date: Date) => void;
+  onSchedule: (date: Date, queueId: string) => void;
+  selectedQueue: string;
 }
 
-const PostScheduler = ({ content, onSchedule }: PostSchedulerProps) => {
+const PostScheduler = ({ content, onSchedule, selectedQueue }: PostSchedulerProps) => {
   const [date, setDate] = useState<Date>();
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          className="neumorphic rounded-full active:pressed text-accent-foreground border-0"
+          className="neumorphic rounded-full active:pressed text-accent hover:text-accent border-0 hover:bg-transparent"
           disabled={!content.trim()}
         >
           <Calendar className="h-4 w-4" />
@@ -37,7 +38,7 @@ const PostScheduler = ({ content, onSchedule }: PostSchedulerProps) => {
             onSelect={(newDate) => {
               if (newDate) {
                 setDate(newDate);
-                onSchedule(newDate);
+                onSchedule(newDate, selectedQueue);
               }
             }}
             initialFocus

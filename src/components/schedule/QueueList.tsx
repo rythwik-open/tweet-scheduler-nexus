@@ -1,20 +1,38 @@
 
 import { format } from 'date-fns';
 import { List } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from 'react';
 
 interface Post {
   id: string;
   content: string;
   scheduledTime: Date | null;
   status: 'draft' | 'scheduled';
+  queueId: string;
+}
+
+interface Queue {
+  id: string;
+  name: string;
 }
 
 interface QueueListProps {
   posts: Post[];
+  queues: Queue[];
 }
 
-const QueueList = ({ posts }: QueueListProps) => {
-  const sortedPosts = [...posts].sort((a, b) => {
+const QueueList = ({ posts, queues }: QueueListProps) => {
+  const [selectedQueue, setSelectedQueue] = useState('default');
+
+  const filteredPosts = posts.filter(post => post.queueId === selectedQueue);
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
     if (!a.scheduledTime) return 1;
     if (!b.scheduledTime) return -1;
     return a.scheduledTime.getTime() - b.scheduledTime.getTime();
@@ -22,10 +40,24 @@ const QueueList = ({ posts }: QueueListProps) => {
 
   return (
     <div className="p-6 h-full">
-      <h2 className="text-lg font-semibold text-primary flex items-center gap-2 mb-4">
-        <List className="h-5 w-5" />
-        Queue
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
+          <List className="h-5 w-5" />
+          Queue
+        </h2>
+        <Select value={selectedQueue} onValueChange={setSelectedQueue}>
+          <SelectTrigger className="w-[180px] neumorphic-inset border-0">
+            <SelectValue placeholder="Select queue" />
+          </SelectTrigger>
+          <SelectContent>
+            {queues.map((queue) => (
+              <SelectItem key={queue.id} value={queue.id}>
+                {queue.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <div className="space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
         {sortedPosts.map((post) => (
           <div
@@ -55,7 +87,7 @@ const QueueList = ({ posts }: QueueListProps) => {
             </div>
           </div>
         ))}
-        {posts.length === 0 && (
+        {sortedPosts.length === 0 && (
           <div className="text-center text-muted-foreground py-8">
             No posts in queue
           </div>
