@@ -5,7 +5,7 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from 'react-oidc-context';
 
-const useCognito = import.meta.env.VITE_USE_COGNITO === "true";
+const useCognito = import.meta.env.VITE_USE_COGNITO === "false";
 
 const cognitoAuthConfig = {
   authority: "https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_fEiOPUEJN",
