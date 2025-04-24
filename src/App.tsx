@@ -7,6 +7,7 @@ import Schedule from "./pages/Schedule";
 import History from "./pages/History";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
+import Settings from "./pages/Settings";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
