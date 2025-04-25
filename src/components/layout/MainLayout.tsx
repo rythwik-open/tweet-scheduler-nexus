@@ -1,15 +1,9 @@
-
 import { useState } from 'react';
 import { Menu, X, Home, Calendar, Clock, BarChart2, Settings, LogOut } from 'lucide-react';
 import NavItem from './NavItem';
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
+const MainLayout = ({ children, onLogout }: { children: React.ReactNode; onLogout: () => void }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleLogout = () => {
-    // Add logout logic here
-    console.log('Logging out...');
-  };
 
   return (
     <div className="min-h-screen">
@@ -32,7 +26,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="mb-8 px-3 space-y-4">
           <NavItem icon={Settings} label="Settings" to="/settings" expanded={isExpanded} />
           <button
-            onClick={handleLogout}
+            onClick={onLogout} // Use the passed `onLogout` function here
             className="w-full neumorphic p-3 rounded-full flex items-center justify-center text-primary active:pressed"
           >
             <LogOut className="h-5 w-5" />
