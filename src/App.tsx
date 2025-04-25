@@ -16,38 +16,38 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const queryClient = new QueryClient();
 
 const App = () => {
-  let auth;
-  try {
-    auth = useAuth();
-  } catch {
-    auth = null; // fallback when not wrapped with AuthProvider
-  }
+  const auth = useAuth();
 
-  const isAuthenticated = auth?.isAuthenticated ?? true; // assume true if no auth
+  const isAuthenticated = auth?.isAuthenticated;
 
   const signOutRedirect = () => {
-    const clientId = "5tt3j9a4rac2ckdgpl65jmlvgs";
-    const logoutUri = window.location.origin;
-    const cognitoDomain = "https://ap-south-1feiopuejn.auth.ap-south-1.amazoncognito.com";
+    const clientId = "j5vv1k04i83joltpak6848u57";
+    const logoutUri = "http://localhost:8080/";
+    const cognitoDomain = "https://ap-south-1e84n71jrx.auth.ap-south-1.amazoncognito.com";
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
+
+  if (auth.isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-white">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-
         {isAuthenticated ? (
           <>
-            {auth && (
-              <button
-                onClick={signOutRedirect}
-                className="fixed top-4 right-4 z-50 bg-white/10 text-white px-4 py-2 rounded-xl"
-              >
-                Sign out
-              </button>
-            )}
+            <button
+              onClick={signOutRedirect}
+              className="fixed top-4 right-4 z-50 bg-white/10 text-white px-4 py-2 rounded-xl"
+            >
+              Sign out
+            </button>
             <BrowserRouter>
               <MainLayout>
                 <Routes>
@@ -55,6 +55,7 @@ const App = () => {
                   <Route path="/schedule" element={<Schedule />} />
                   <Route path="/history" element={<History />} />
                   <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </MainLayout>

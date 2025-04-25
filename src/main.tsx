@@ -5,14 +5,16 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from 'react-oidc-context';
 
-const useCognito = import.meta.env.VITE_USE_COGNITO === "false";
+const useCognito = import.meta.env.VITE_USE_COGNITO === "true";
 
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_fEiOPUEJN",
-  client_id: "5tt3j9a4rac2ckdgpl65jmlvgs",
-  redirect_uri: window.location.origin,
+  authority: "https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_E84n71jRx",
+  client_id: "j5vv1k04i83joltpak6848u57",
+  redirect_uri: "http://localhost:8080/",
   response_type: "code",
-  scope: "email openid phone",
+  scope: "openid email profile", // profile gives you "name" etc.
+  automaticSilentRenew: true,
+  loadUserInfo: true,
 };
 
 const root = createRoot(document.getElementById("root")!);
