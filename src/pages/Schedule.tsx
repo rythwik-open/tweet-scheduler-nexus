@@ -16,6 +16,7 @@ interface Post {
   scheduledTime: string | null;
   status: 'draft' | 'scheduled';
   queueId: string;
+  createdAt: string; // Added createdAt
 }
 
 interface Queue {
@@ -29,8 +30,6 @@ const Schedule = () => {
   const auth = useAuth();
   const { user } = auth || {};
   const [isUserLoaded, setIsUserLoaded] = useState(false);
-
-  // State hooks
   const [posts, setPosts] = useState<Post[]>([]);
   const [content, setContent] = useState('');
   const [queues, setQueues] = useState<Queue[]>([
@@ -42,22 +41,41 @@ const Schedule = () => {
   const [newQueueTime, setNewQueueTime] = useState('09:00');
   const [queueFilter, setQueueFilter] = useState('all');
   const [isPosting, setIsPosting] = useState(false);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // Ensure that the user is loaded
   useEffect(() => {
     if (user) {
       setIsUserLoaded(true);
     }
   }, [user]);
 
-  // Early return after all hooks
-  if (!auth || !isUserLoaded) {
-    return (
-      <div className="loading-state">
-        <p>Loading user data...</p>
-      </div>
-    );
-  }
+  const fetchPosts = async () => {
+    if (!user?.profile?.sub || !isUserLoaded) return;
+    setIsLoadingPosts(true);
+    setFetchError(null);
+    try {
+      const response = await fetch('https://zhewfn3l0l.execute-api.ap-south-1.amazonaws.com/getQueue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.profile.sub }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPosts(data);
+      } else {
+        setFetchError('Failed to load posts');
+      }
+    } catch (error) {
+      setFetchError('Error loading posts');
+    } finally {
+      setIsLoadingPosts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [user, isUserLoaded]);
 
   const handlePostNow = async () => {
     if (!content.trim()) return;
@@ -67,8 +85,6 @@ const Schedule = () => {
     }
 
     const postsArray = content.split('\n\n').filter(text => text.trim());
-    const id = crypto.randomUUID();
-
     setIsPosting(true);
 
     for (const postContent of postsArray) {
@@ -87,16 +103,7 @@ const Schedule = () => {
         if (!response.ok) {
           console.error('Failed to add to queue:', postContent);
         } else {
-          setPosts(prev => [
-            ...prev,
-            {
-              id,
-              content: postContent.trim(),
-              scheduledTime: null,
-              status: 'draft',
-              queueId: selectedQueue,
-            }
-          ]);
+          await fetchPosts(); // Refresh posts on success
         }
       } catch (error) {
         console.error('Error adding to queue:', error);
@@ -132,8 +139,6 @@ const Schedule = () => {
     }
 
     const postsArray = content.split('\n\n').filter(text => text.trim());
-    const id = crypto.randomUUID();
-
     setIsPosting(true);
 
     for (const postContent of postsArray) {
@@ -152,16 +157,7 @@ const Schedule = () => {
         if (!response.ok) {
           console.error('Failed to schedule post:', postContent);
         } else {
-          setPosts(prev => [
-            ...prev,
-            {
-              id,
-              content: postContent.trim(),
-              scheduledTime: scheduledTime.toISOString(),
-              status: 'scheduled',
-              queueId,
-            }
-          ]);
+          await fetchPosts(); // Refresh posts on success
         }
       } catch (error) {
         console.error('Error scheduling post:', error);
@@ -183,7 +179,6 @@ const Schedule = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-6">
-        {/* Left side: Create Posts */}
         <Card className="neumorphic p-6 border-0">
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-primary">Create Posts</h2>
@@ -215,7 +210,7 @@ const Schedule = () => {
                 className="neumorphic rounded-full active:pressed text-accent hover:text-accent border-0 hover:bg-transparent"
               >
                 <Upload className="h-4 w-4" />
-                {isPosting ? 'Adding...' : 'Add to Queue'}
+                {isPosting ? 'Posting...' : 'Post Now'}
               </Button>
               <PostScheduler
                 content={content}
@@ -226,7 +221,6 @@ const Schedule = () => {
           </div>
         </Card>
 
-        {/* Right side: Queues */}
         <Card className="neumorphic p-6 border-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-primary">Queues</h2>
@@ -300,7 +294,6 @@ const Schedule = () => {
         </Card>
       </div>
 
-      {/* Full-width Posts list */}
       <Card className="neumorphic p-6 border-0">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-primary">Posts</h2>
@@ -320,7 +313,15 @@ const Schedule = () => {
           </Select>
         </div>
 
-        {filteredPosts.length === 0 ? (
+        {isLoadingPosts ? (
+          <div className="text-center text-muted-foreground py-10">
+            Loading posts...
+          </div>
+        ) : fetchError ? (
+          <div className="text-center text-red-500 py-10">
+            {fetchError}
+          </div>
+        ) : filteredPosts.length === 0 ? (
           <div className="text-center text-muted-foreground py-10">
             No posts yet. Start by creating a new post!
           </div>

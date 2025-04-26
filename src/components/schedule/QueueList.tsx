@@ -7,6 +7,7 @@ interface Post {
   scheduledTime: string | null;
   status: 'draft' | 'scheduled';
   queueId: string;
+  createdAt: string; // Added createdAt
 }
 
 interface Queue {
@@ -21,14 +22,11 @@ interface QueueListProps {
 
 const QueueList = ({ posts }: QueueListProps) => {
   const sortedPosts = [...posts].sort((a, b) => {
-    if (!a.scheduledTime) return 1;
-    if (!b.scheduledTime) return -1;
-    const dateA = new Date(a.scheduledTime);
-    const dateB = new Date(b.scheduledTime);
-    // Handle invalid dates (fallback to original behavior)
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
     if (isNaN(dateA.getTime())) return 1;
     if (isNaN(dateB.getTime())) return -1;
-    return dateA.getTime() - dateB.getTime();
+    return dateB.getTime() - dateA.getTime(); // Newest first
   });
 
   return (

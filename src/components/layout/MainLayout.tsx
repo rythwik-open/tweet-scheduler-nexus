@@ -8,7 +8,7 @@ const MainLayout = ({ children, onLogout }: { children: React.ReactNode; onLogou
   return (
     <div className="min-h-screen">
       <aside
-        className={`fixed top-0 left-0 h-full bg-background transition-all duration-300 z-30 neumorphic border-r border-border flex flex-col ${
+        className={`fixed top-0 left-0 h-full bg-background transition-all duration-300 z-30 neumorphic flex flex-col rounded-none ${
           isExpanded ? 'w-64' : 'w-20'
         }`}
       >
@@ -26,15 +26,19 @@ const MainLayout = ({ children, onLogout }: { children: React.ReactNode; onLogou
         <div className="mb-8 px-3 space-y-4">
           <NavItem icon={Settings} label="Settings" to="/settings" expanded={isExpanded} />
           <button
-            onClick={onLogout} // Use the passed `onLogout` function here
-            className="w-full neumorphic p-3 rounded-full flex items-center justify-center text-primary active:pressed"
+            onClick={onLogout}
+            className={`w-full neumorphic p-3 rounded-full flex items-center text-primary active:pressed ${
+              isExpanded ? 'justify-start pl-4' : 'justify-center'
+            }`}
           >
             <LogOut className="h-5 w-5" />
             {isExpanded && <span className="ml-3 text-sm">Logout</span>}
           </button>
-          <button 
+          <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full neumorphic p-3 rounded-full flex items-center justify-center text-primary active:pressed"
+            className={`w-full neumorphic p-3 rounded-full flex items-center text-primary active:pressed ${
+              isExpanded ? 'justify-start pl-4' : 'justify-center'
+            }`}
           >
             <Menu className="h-5 w-5" />
             {isExpanded && <span className="ml-3 text-sm">Toggle Sidebar</span>}
