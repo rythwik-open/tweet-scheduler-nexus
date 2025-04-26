@@ -24,8 +24,18 @@ const App = () => {
   // Cognito sign-out function
   const signOutRedirect = () => {
     const clientId = "3irqdath7oj9ipbod5h410c5q3";
-    const logoutUri = "http://localhost:8080/login"; // Your desired post-logout redirect
     const cognitoDomain = "https://ap-south-15rv1i5qc5.auth.ap-south-1.amazoncognito.com";
+
+    // Dynamically set the logout URI based on the environment
+    const isLocalhost = window.location.hostname === "localhost";
+    const isPreview = window.location.hostname === "preview--tweet-scheduler-nexus.lovable.app";
+
+    const logoutUri = isLocalhost
+      ? "http://localhost:8080/login"
+      : isPreview
+      ? "https://preview--tweet-scheduler-nexus.lovable.app/login"
+      : "https://tweet-scheduler-nexus.lovable.app/login";
+
     const logoutUrl = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
 
     // Use the signOut function from react-oidc-context directly
