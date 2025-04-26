@@ -29,11 +29,14 @@ const App = () => {
     // Dynamically set the logout URI based on the environment
     const isLocalhost = window.location.hostname === "localhost";
     const isPreview = window.location.hostname === "preview--tweet-scheduler-nexus.lovable.app";
+    const isIdPreview = window.location.hostname === "id-preview--d4c3a08c-3f0c-4807-b234-fa087eec7556.lovable.app";
 
     const logoutUri = isLocalhost
       ? "http://localhost:8080/login"
       : isPreview
       ? "https://preview--tweet-scheduler-nexus.lovable.app/login"
+      : isIdPreview
+      ? "https://id-preview--d4c3a08c-3f0c-4807-b234-fa087eec7556.lovable.app/login"
       : "https://tweet-scheduler-nexus.lovable.app/login";
 
     const logoutUrl = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
