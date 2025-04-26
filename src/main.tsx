@@ -5,14 +5,20 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from 'react-oidc-context';
 
-const useCognito = import.meta.env.VITE_USE_COGNITO === "false";
+const useCognito = import.meta.env.VITE_USE_COGNITO === "true";
+
+const isLocalhost = window.location.hostname === "localhost";
 
 // ✅ Correct authority — your hosted UI domain, not the IdP endpoint
 const cognitoAuthConfig = {
   authority: "https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_5rV1I5qC5", 
   client_id: "3irqdath7oj9ipbod5h410c5q3",
-  redirect_uri: "http://localhost:8080/",
-  post_logout_redirect_uri: "http://localhost:8080/login", // ✅ Add this
+  redirect_uri: isLocalhost
+    ? "http://localhost:8080/"
+    : "https://tweet-scheduler-nexus.lovable.app/",
+  post_logout_redirect_uri: isLocalhost
+    ? "http://localhost:8080/login"
+    : "https://tweet-scheduler-nexus.lovable.app/login",
   response_type: "code",
   scope: "openid email profile",
   automaticSilentRenew: true,
