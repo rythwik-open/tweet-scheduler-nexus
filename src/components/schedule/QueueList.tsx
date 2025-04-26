@@ -1,13 +1,17 @@
 import { format } from 'date-fns';
-import { List } from 'lucide-react';
+import { List, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useState } from 'react';
 
 interface Post {
-  id: string;
+  id: string; // queueId_postId
   content: string;
   scheduledTime: string | null;
   status: 'draft' | 'scheduled';
   queueId: string;
-  createdAt: string; // Added createdAt
+  createdAt: string;
 }
 
 interface Queue {
@@ -18,16 +22,32 @@ interface Queue {
 interface QueueListProps {
   posts: Post[];
   queues: Queue[];
+  sortDirection: 'newest' | 'oldest';
+  onDeletePost: (postId: string) => void;
+  selectedPostIds: string[];
+  setSelectedPostIds: (ids: string[]) => void; // Added for bulk selection
 }
 
-const QueueList = ({ posts }: QueueListProps) => {
+const QueueList = ({ posts, sortDirection, onDeletePost, selectedPostIds, setSelectedPostIds }: QueueListProps) => {
+  const [deletePostId, setDeletePostId] = useState<string | null>(null);
+
   const sortedPosts = [...posts].sort((a, b) => {
     const dateA = new Date(a.createdAt);
     const dateB = new Date(b.createdAt);
     if (isNaN(dateA.getTime())) return 1;
     if (isNaN(dateB.getTime())) return -1;
-    return dateB.getTime() - dateA.getTime(); // Newest first
+    return sortDirection === 'newest' 
+      ? dateB.getTime() - dateA.getTime()
+      : dateA.getTime() - dateB.getTime();
   });
+
+  const handleCheckboxChange = (postId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedPostIds([...selectedPostIds, postId]);
+    } else {
+      setSelectedPostIds(selectedPostIds.filter(id => id !== postId));
+    }
+  };
 
   return (
     <div className="p-6 h-full">
@@ -44,12 +64,18 @@ const QueueList = ({ posts }: QueueListProps) => {
               className="p-4 rounded-lg neumorphic"
             >
               <div className="flex justify-between items-start gap-4">
-                <div className="flex-1">
-                  <p className="text-sm text-foreground whitespace-pre-wrap">
-                    {post.content}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={selectedPostIds.includes(post.id)}
+                    onCheckedChange={(checked) => handleCheckboxChange(post.id, !!checked)}
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
+                      {post.content}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex items-center gap-2">
                   <span className={`text-xs px-2 py-1 rounded-full ${
                     post.status === 'scheduled' 
                       ? 'bg-primary/20 text-primary' 
@@ -62,6 +88,14 @@ const QueueList = ({ posts }: QueueListProps) => {
                       {format(new Date(post.scheduledTime), 'PPP')}
                     </p>
                   )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="neumorphic rounded-full active:pressed text-red-500 hover:text-red-500 hover:bg-transparent"
+                    onClick={() => setDeletePostId(post.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -72,6 +106,36 @@ const QueueList = ({ posts }: QueueListProps) => {
           </div>
         )}
       </div>
+
+      <Dialog open={!!deletePostId} onOpenChange={() => setDeletePostId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Post</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeletePostId(null)}
+              className="neumorphic-inset"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deletePostId) onDeletePost(deletePostId);
+                setDeletePostId(null);
+              }}
+              className="neumorphic rounded-full text-white bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

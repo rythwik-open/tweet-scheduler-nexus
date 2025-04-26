@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Upload, Plus } from 'lucide-react';
+import { Calendar, Upload, Plus, ArrowUpDown, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog'; // Added DialogTrigger
 import PostScheduler from '@/components/schedule/PostScheduler';
 import QueueList from '@/components/schedule/QueueList';
 import { useAuth } from 'react-oidc-context';
 
 interface Post {
-  id: string;
+  id: string; // queueId_postId
   content: string;
   scheduledTime: string | null;
   status: 'draft' | 'scheduled';
   queueId: string;
-  createdAt: string; // Added createdAt
+  createdAt: string;
 }
 
 interface Queue {
@@ -43,6 +43,9 @@ const Schedule = () => {
   const [isPosting, setIsPosting] = useState(false);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'newest' | 'oldest'>('newest');
+  const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -63,6 +66,7 @@ const Schedule = () => {
       if (response.ok) {
         const data = await response.json();
         setPosts(data);
+        setSelectedPostIds([]); // Clear selection on refresh
       } else {
         setFetchError('Failed to load posts');
       }
@@ -103,7 +107,7 @@ const Schedule = () => {
         if (!response.ok) {
           console.error('Failed to add to queue:', postContent);
         } else {
-          await fetchPosts(); // Refresh posts on success
+          await fetchPosts();
         }
       } catch (error) {
         console.error('Error adding to queue:', error);
@@ -157,7 +161,7 @@ const Schedule = () => {
         if (!response.ok) {
           console.error('Failed to schedule post:', postContent);
         } else {
-          await fetchPosts(); // Refresh posts on success
+          await fetchPosts();
         }
       } catch (error) {
         console.error('Error scheduling post:', error);
@@ -166,6 +170,62 @@ const Schedule = () => {
 
     setIsPosting(false);
     setContent('');
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!user?.profile?.sub) {
+      console.error('User not authenticated.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://zhewfn3l0l.execute-api.ap-south-1.amazonaws.com/deletePost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.profile.sub,
+          postId, // queueId_postId
+        }),
+      });
+
+      if (response.ok) {
+        await fetchPosts();
+      } else {
+        console.error('Failed to delete post');
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!user?.profile?.sub || selectedPostIds.length === 0) return;
+
+    try {
+      for (const postId of selectedPostIds) {
+        const response = await fetch('https://zhewfn3l0l.execute-api.ap-south-1.amazonaws.com/deletePost', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.profile.sub,
+            postId, // queueId_postId
+          }),
+        });
+
+        if (!response.ok) {
+          console.error(`Failed to delete post: ${postId}`);
+        }
+      }
+      await fetchPosts();
+    } catch (error) {
+      console.error('Error during bulk delete:', error);
+    } finally {
+      setIsBulkDeleteOpen(false);
+    }
+  };
+
+  const toggleSortDirection = () => {
+    setSortDirection(prev => (prev === 'newest' ? 'oldest' : 'newest'));
   };
 
   const filteredPosts = queueFilter === 'all'
@@ -181,7 +241,7 @@ const Schedule = () => {
       <div className="grid grid-cols-2 gap-6">
         <Card className="neumorphic p-6 border-0">
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-primary">Create Posts</h2>
+            <h2 className="text-lg font-semibold text-primary">Add to Queues</h2>
 
             <Select value={selectedQueue} onValueChange={setSelectedQueue}>
               <SelectTrigger className="neumorphic-inset border-0">
@@ -297,20 +357,40 @@ const Schedule = () => {
       <Card className="neumorphic p-6 border-0">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-primary">Posts</h2>
-
-          <Select value={queueFilter} onValueChange={setQueueFilter}>
-            <SelectTrigger className="w-[180px] neumorphic-inset border-0">
-              <SelectValue placeholder="Filter by queue" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Queues</SelectItem>
-              {queues.map(queue => (
-                <SelectItem key={queue.id} value={queue.id}>
-                  {queue.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            {selectedPostIds.length > 0 && (
+              <Button
+                onClick={() => setIsBulkDeleteOpen(true)}
+                className="neumorphic rounded-full active:pressed text-red-500 hover:text-red-500 border-0 hover:bg-transparent h-8 px-3"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete Selected
+              </Button>
+            )}
+            <Button
+              onClick={toggleSortDirection}
+              className="neumorphic rounded-full active:pressed text-accent hover:text-accent border-0 hover:bg-transparent h-8 w-8 p-0"
+              title={sortDirection === 'newest' ? 'Sort oldest to newest' : 'Sort newest to oldest'}
+            >
+              <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'newest' ? 'rotate-0' : 'rotate-180'}`} />
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {sortDirection === 'newest' ? 'Newest First' : 'Oldest First'}
+            </span>
+            <Select value={queueFilter} onValueChange={setQueueFilter}>
+              <SelectTrigger className="w-[180px] neumorphic-inset border-0">
+                <SelectValue placeholder="Filter by queue" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Queues</SelectItem>
+                {queues.map(queue => (
+                  <SelectItem key={queue.id} value={queue.id}>
+                    {queue.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {isLoadingPosts ? (
@@ -326,9 +406,43 @@ const Schedule = () => {
             No posts yet. Start by creating a new post!
           </div>
         ) : (
-          <QueueList posts={filteredPosts} queues={queues} />
+          <QueueList
+            posts={filteredPosts}
+            queues={queues}
+            sortDirection={sortDirection}
+            onDeletePost={handleDeletePost}
+            selectedPostIds={selectedPostIds}
+            setSelectedPostIds={setSelectedPostIds}
+          />
         )}
       </Card>
+
+      <Dialog open={isBulkDeleteOpen} onOpenChange={setIsBulkDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Selected Posts</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {selectedPostIds.length} selected post(s)? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsBulkDeleteOpen(false)}
+              className="neumorphic-inset"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleBulkDelete}
+              className="neumorphic rounded-full text-white bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
