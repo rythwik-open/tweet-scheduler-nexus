@@ -23,10 +23,9 @@ const App = () => {
 
   // Cognito sign-out function
   const signOutRedirect = () => {
-    const clientId = "j5vv1k04i83joltpak6848u57";
+    const clientId = "3irqdath7oj9ipbod5h410c5q3";
     const logoutUri = "http://localhost:8080/login"; // Your desired post-logout redirect
-    const cognitoDomain = "https://ap-south-1e84n71jrx.auth.ap-south-1.amazoncognito.com";
-
+    const cognitoDomain = "https://ap-south-15rv1i5qc5.auth.ap-south-1.amazoncognito.com";
     const logoutUrl = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
 
     // Use the signOut function from react-oidc-context directly
