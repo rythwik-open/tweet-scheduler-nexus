@@ -5,8 +5,6 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from 'react-oidc-context';
 
-const useCognito = import.meta.env.VITE_USE_COGNITO === "true";
-
 const isLocalhost = window.location.hostname === "localhost";
 const isPreview = window.location.hostname === "preview--tweet-scheduler-nexus.lovable.app";
 const isIdPreview = window.location.hostname === "id-preview--d4c3a08c-3f0c-4807-b234-fa087eec7556.lovable.app";
@@ -43,12 +41,8 @@ const root = createRoot(document.getElementById("root")!);
 
 root.render(
   <React.StrictMode>
-    {useCognito ? (
-      <AuthProvider {...cognitoAuthConfig}>
-        <App />
-      </AuthProvider>
-    ) : (
+    <AuthProvider {...cognitoAuthConfig}>
       <App />
-    )}
+    </AuthProvider>
   </React.StrictMode>
 );
