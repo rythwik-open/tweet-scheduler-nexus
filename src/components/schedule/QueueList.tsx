@@ -9,7 +9,7 @@ interface Post {
   id: string; // queueId_postId
   content: string;
   scheduledTime: string | null;
-  status: 'draft' | 'scheduled';
+  status: 'draft' | 'scheduled' | 'queued' | 'Posted'; // Updated to match Schedule.tsx
   queueId: string;
   createdAt: string;
 }
@@ -25,10 +25,11 @@ interface QueueListProps {
   sortDirection: 'newest' | 'oldest';
   onDeletePost: (postId: string) => void;
   selectedPostIds: string[];
-  setSelectedPostIds: (ids: string[]) => void; // Added for bulk selection
+  setSelectedPostIds: (ids: string[]) => void;
+  isSelectMultipleEnabled: boolean;
 }
 
-const QueueList = ({ posts, sortDirection, onDeletePost, selectedPostIds, setSelectedPostIds }: QueueListProps) => {
+const QueueList = ({ posts, sortDirection, onDeletePost, selectedPostIds, setSelectedPostIds, isSelectMultipleEnabled }: QueueListProps) => {
   const [deletePostId, setDeletePostId] = useState<string | null>(null);
 
   const sortedPosts = [...posts].sort((a, b) => {
@@ -65,10 +66,12 @@ const QueueList = ({ posts, sortDirection, onDeletePost, selectedPostIds, setSel
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={selectedPostIds.includes(post.id)}
-                    onCheckedChange={(checked) => handleCheckboxChange(post.id, !!checked)}
-                  />
+                  {isSelectMultipleEnabled && (
+                    <Checkbox
+                      checked={selectedPostIds.includes(post.id)}
+                      onCheckedChange={(checked) => handleCheckboxChange(post.id, !!checked)}
+                    />
+                  )}
                   <div className="flex-1">
                     <p className="text-sm text-foreground whitespace-pre-wrap">
                       {post.content}

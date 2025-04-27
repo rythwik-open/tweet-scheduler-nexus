@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Upload, Plus, ArrowUpDown, Trash2 } from 'lucide-react';
+import { Calendar, Upload, Plus, ArrowUpDown, Trash2, CheckSquare } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog'; // Added DialogTrigger
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import PostScheduler from '@/components/schedule/PostScheduler';
 import QueueList from '@/components/schedule/QueueList';
 import { useAuth } from 'react-oidc-context';
@@ -14,7 +14,7 @@ interface Post {
   id: string; // queueId_postId
   content: string;
   scheduledTime: string | null;
-  status: 'draft' | 'scheduled';
+  status: 'draft' | 'scheduled' | 'queued' | 'Posted';
   queueId: string;
   createdAt: string;
 }
@@ -43,9 +43,10 @@ const Schedule = () => {
   const [isPosting, setIsPosting] = useState(false);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'newest' | 'oldest'>('newest');
+  const [sortDirection, setSortDirection] = useState<'newest' | 'oldest'>('oldest'); // Changed to 'oldest'
   const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [isSelectMultipleEnabled, setIsSelectMultipleEnabled] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -228,9 +229,14 @@ const Schedule = () => {
     setSortDirection(prev => (prev === 'newest' ? 'oldest' : 'newest'));
   };
 
+  const toggleSelectMultiple = () => {
+    setIsSelectMultipleEnabled(prev => !prev);
+    setSelectedPostIds([]); // Clear selection when toggling
+  };
+
   const filteredPosts = queueFilter === 'all'
-    ? posts
-    : posts.filter(post => post.queueId === queueFilter);
+    ? posts.filter(post => post.status.toLowerCase() !== 'posted')
+    : posts.filter(post => post.queueId === queueFilter && post.status.toLowerCase() !== 'posted');
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -241,7 +247,7 @@ const Schedule = () => {
       <div className="grid grid-cols-2 gap-6">
         <Card className="neumorphic p-6 border-0">
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-primary">Add to Queues</h2>
+            <h2 className="text-lg font-semibold text-primary">Create Posts</h2>
 
             <Select value={selectedQueue} onValueChange={setSelectedQueue}>
               <SelectTrigger className="neumorphic-inset border-0">
@@ -333,7 +339,7 @@ const Schedule = () => {
 
           <div className="space-y-3">
             {queues.map(queue => {
-              const postCount = posts.filter(post => post.queueId === queue.id).length;
+              const postCount = posts.filter(post => post.queueId === queue.id && post.status.toLowerCase() !== 'posted').length;
               return (
                 <div key={queue.id} className="flex justify-between items-center p-3 neumorphic-inset rounded-lg">
                   <div>
@@ -358,7 +364,15 @@ const Schedule = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-primary">Posts</h2>
           <div className="flex items-center gap-2">
-            {selectedPostIds.length > 0 && (
+            <Button
+              onClick={toggleSelectMultiple}
+              className="neumorphic rounded-full active:pressed text-accent hover:text-accent border-0 hover:bg-transparent h-8 px-3"
+              title={isSelectMultipleEnabled ? 'Disable multiple selection' : 'Enable multiple selection'}
+            >
+              <CheckSquare className="h-4 w-4 mr-1" />
+              {isSelectMultipleEnabled ? 'Disable Select' : 'Select Multiple'}
+            </Button>
+            {isSelectMultipleEnabled && selectedPostIds.length > 0 && (
               <Button
                 onClick={() => setIsBulkDeleteOpen(true)}
                 className="neumorphic rounded-full active:pressed text-red-500 hover:text-red-500 border-0 hover:bg-transparent h-8 px-3"
@@ -413,6 +427,7 @@ const Schedule = () => {
             onDeletePost={handleDeletePost}
             selectedPostIds={selectedPostIds}
             setSelectedPostIds={setSelectedPostIds}
+            isSelectMultipleEnabled={isSelectMultipleEnabled}
           />
         )}
       </Card>
