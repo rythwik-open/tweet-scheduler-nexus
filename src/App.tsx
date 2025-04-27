@@ -9,9 +9,11 @@ import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import Login from "./pages/login";
+import Callback from "./pages/Callback";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { XAuthProvider } from "@/context/XAuthContext";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,13 @@ const App = () => {
 
   const isLoading = auth?.isLoading ?? false;
   const isAuthenticated = auth?.isAuthenticated ?? false;
+
+  // Debug logs for Cognito state
+  console.log('App - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
+  console.log('App - auth state:', auth);
+  if (auth.error) {
+    console.log('App - Cognito auth error:', auth.error);
+  }
 
   // Cognito sign-out function
   const signOutRedirect = () => {
@@ -61,43 +70,87 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public login route */}
-            <Route path="/login" element={<Login />} />
+        <XAuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes - always accessible */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/callback" element={<Callback />} />
 
-            {/* Protected Routes */}
-            {isAuthenticated ? (
-              <>
-                <Route
-                  path="/"
-                  element={<MainLayout onLogout={signOutRedirect}><Index /></MainLayout>}
-                />
-                <Route
-                  path="/schedule"
-                  element={<MainLayout onLogout={signOutRedirect}><Schedule /></MainLayout>}
-                />
-                <Route
-                  path="/history"
-                  element={<MainLayout onLogout={signOutRedirect}><History /></MainLayout>}
-                />
-                <Route
-                  path="/analytics"
-                  element={<MainLayout onLogout={signOutRedirect}><Analytics /></MainLayout>}
-                />
-                <Route
-                  path="/settings"
-                  element={<MainLayout onLogout={signOutRedirect}><Settings /></MainLayout>}
-                />
-                <Route path="*" element={<NotFound />} />
-              </>
-            ) : (
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            )}
-          </Routes>
-        </BrowserRouter>
+              {/* Protected routes - only accessible if authenticated with Cognito */}
+              <Route
+                path="/"
+                element={
+                  isAuthenticated ? (
+                    <MainLayout onLogout={signOutRedirect}>
+                      <Index />
+                    </MainLayout>
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+              <Route
+                path="/schedule"
+                element={
+                  isAuthenticated ? (
+                    <MainLayout onLogout={signOutRedirect}>
+                      <Schedule />
+                    </MainLayout>
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+              <Route
+                path="/history"
+                element={
+                  isAuthenticated ? (
+                    <MainLayout onLogout={signOutRedirect}>
+                      <History />
+                    </MainLayout>
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  isAuthenticated ? (
+                    <MainLayout onLogout={signOutRedirect}>
+                      <Analytics />
+                    </MainLayout>
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  isAuthenticated ? (
+                    <MainLayout onLogout={signOutRedirect}>
+                      <Settings />
+                    </MainLayout>
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+
+              {/* Catch-all route for unmatched paths */}
+              <Route
+                path="*"
+                element={
+                  isAuthenticated ? <NotFound /> : <Navigate to="/login" replace />
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </XAuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

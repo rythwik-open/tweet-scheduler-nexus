@@ -1,12 +1,23 @@
-
 import { Card } from '@/components/ui/card';
 import { Settings as SettingsIcon, Twitter, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useXAuth } from '@/context/XAuthContext';
 
 const Settings = () => {
+  const { isAuthenticated, login, logout, exchangeCodeForToken } = useXAuth();
+
+  const handleConnectTwitter = async () => {
+    try {
+      const code = await login(); // Opens popup for X auth
+      await exchangeCodeForToken(code); // Exchange code for token
+    } catch (error) {
+      console.error('X Auth failed:', error);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
@@ -48,10 +59,17 @@ const Settings = () => {
               <Twitter className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-primary">Twitter Integration</h2>
             </div>
-            <p className="text-muted-foreground">Connect your Twitter account to enable posting.</p>
-            <Button className="neumorphic rounded-full active:pressed text-accent hover:text-accent border-0 hover:bg-transparent">
+            <p className="text-muted-foreground">
+              {isAuthenticated
+                ? 'Your Twitter account is connected.'
+                : 'Connect your Twitter account to enable posting.'}
+            </p>
+            <Button
+              onClick={isAuthenticated ? logout : handleConnectTwitter}
+              className="neumorphic rounded-full active:pressed text-accent hover:text-accent border-0 hover:bg-transparent"
+            >
               <Twitter className="h-4 w-4 mr-2" />
-              Connect Twitter Account
+              {isAuthenticated ? 'Disconnect Twitter Account' : 'Connect Twitter Account'}
             </Button>
           </div>
         </Card>

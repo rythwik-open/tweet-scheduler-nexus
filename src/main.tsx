@@ -4,6 +4,10 @@ import React from 'react';
 import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from 'react-oidc-context';
+import { Buffer } from 'buffer';
+
+// Polyfill Buffer globally at the earliest point
+globalThis.Buffer = Buffer;
 
 const isLocalhost = window.location.hostname === "localhost";
 const isPreview = window.location.hostname === "preview--tweet-scheduler-nexus.lovable.app";
@@ -35,6 +39,9 @@ const cognitoAuthConfig = {
   scope: "openid email profile",
   automaticSilentRenew: true,
   loadUserInfo: true,
+  onSigninCallback: () => {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  },
 };
 
 const root = createRoot(document.getElementById("root")!);
