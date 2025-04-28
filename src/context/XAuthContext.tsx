@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 import { Buffer } from 'buffer';
+import { useAuth } from 'react-oidc-context'; // Import useAuth
 
 const XAuthContext = createContext(null);
 
@@ -7,6 +8,7 @@ export const XAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [user, setUser] = useState(null);
+  const auth = useAuth(); // Get Cognito auth context
 
   const clientId = import.meta.env.VITE_APP_X_CLIENT_ID;
   const clientSecret = import.meta.env.VITE_APP_X_CLIENT_SECRET;
@@ -62,12 +64,14 @@ export const XAuthProvider = ({ children }) => {
 
   const exchangeCodeForToken = async (code) => {
     const codeVerifier = localStorage.getItem('code_verifier');
-  
+    const cognitoToken = auth.user?.access_token; // Get Cognito JWT token
+
     // Call your backend to exchange the code for a token
-    const response = await fetch('https://your-backend-api/exchange-token', {
+    const response = await fetch('https://vm7pcq411e.execute-api.ap-south-1.amazonaws.com/connect', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cognitoToken}`, // Add Cognito token
       },
       body: JSON.stringify({
         code,
@@ -77,22 +81,22 @@ export const XAuthProvider = ({ children }) => {
         client_secret: clientSecret,
       }),
     });
-  
+
     if (!response.ok) {
       throw new Error('Failed to exchange code for token');
     }
-  
+
     const data = await response.json();
     const { access_token, refresh_token, expires_in, user: userData } = data;
-  
+
     setAccessToken(access_token);
     localStorage.setItem('x_access_token', access_token);
     localStorage.setItem('x_refresh_token', refresh_token);
     localStorage.setItem('x_token_expiry', (Date.now() + expires_in * 1000).toString());
-  
+
     setUser(userData);
     setIsAuthenticated(true);
-    };
+  };
 
   const value = {
     isAuthenticated,
