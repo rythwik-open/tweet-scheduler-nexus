@@ -21,7 +21,6 @@ export const XAuthProvider = ({ children }) => {
 
     const authUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&code_challenge=${code_challenge}&code_challenge_method=S256`;
 
-    // Open a popup for X authorization
     const width = 600;
     const height = 600;
     const left = window.screenX + (window.outerWidth - width) / 2;
@@ -62,8 +61,38 @@ export const XAuthProvider = ({ children }) => {
   };
 
   const exchangeCodeForToken = async (code) => {
-    console.log('Exchanging code for token:', code);
-  };
+    const codeVerifier = localStorage.getItem('code_verifier');
+  
+    // Call your backend to exchange the code for a token
+    const response = await fetch('https://your-backend-api/exchange-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        code,
+        code_verifier: codeVerifier,
+        redirect_uri: redirectUri,
+        client_id: clientId,
+        client_secret: clientSecret,
+      }),
+    });
+  
+    if (!response.ok) {
+      throw new Error('Failed to exchange code for token');
+    }
+  
+    const data = await response.json();
+    const { access_token, refresh_token, expires_in, user: userData } = data;
+  
+    setAccessToken(access_token);
+    localStorage.setItem('x_access_token', access_token);
+    localStorage.setItem('x_refresh_token', refresh_token);
+    localStorage.setItem('x_token_expiry', (Date.now() + expires_in * 1000).toString());
+  
+    setUser(userData);
+    setIsAuthenticated(true);
+    };
 
   const value = {
     isAuthenticated,
