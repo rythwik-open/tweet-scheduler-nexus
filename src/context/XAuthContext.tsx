@@ -1,6 +1,6 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { Buffer } from 'buffer';
-import { useAuth } from 'react-oidc-context'; // Import useAuth
+import { useAuth } from 'react-oidc-context';
 
 const XAuthContext = createContext(null);
 
@@ -8,12 +8,57 @@ export const XAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [user, setUser] = useState(null);
-  const auth = useAuth(); // Get Cognito auth context
+  const auth = useAuth();
 
   const clientId = import.meta.env.VITE_APP_X_CLIENT_ID;
   const clientSecret = import.meta.env.VITE_APP_X_CLIENT_SECRET;
   const redirectUri = import.meta.env.VITE_APP_X_CALLBACK_URL;
   const scope = "tweet.read users.read tweet.write offline.access";
+
+  const fetchUserStatus = async () => {
+    try {
+      const cognitoToken = auth.user?.access_token;
+      if (!cognitoToken) {
+        console.log('No Cognito token available');
+        return;
+      }
+      console.log('Cognito Token:', cognitoToken);
+      // Decode JWT payload
+      const payload = JSON.parse(atob(cognitoToken.split('.')[1]));
+      console.log('Token Payload:', payload);
+
+      const response = await fetch('https://vm7pcq411e.execute-api.ap-south-1.amazonaws.com/user', {
+        headers: {
+          'Authorization': `Bearer ${cognitoToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.log('Fetch response:', response.status, await response.text());
+        throw new Error('Failed to fetch user status');
+      }
+
+      const data = await response.json();
+      console.log('isTokenPresent:', data.isTokenPresent); // Log the value of isTokenPresent
+      setIsAuthenticated(data.isTokenPresent);
+      setUser({
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        profile_image_url: data.profile_image_url
+      });
+    } catch (error) {
+      console.error('Fetch user status failed:', error);
+      setIsAuthenticated(false);
+      setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    if (auth.isAuthenticated && auth.user?.access_token) {
+      fetchUserStatus();
+    }
+  }, [auth.isAuthenticated, auth.user?.access_token]);
 
   const login = async () => {
     const state = "x-auth";
@@ -56,22 +101,25 @@ export const XAuthProvider = ({ children }) => {
     });
   };
 
-  const logout = () => {
+  const logout = async () => {
     setIsAuthenticated(false);
     setAccessToken(null);
     setUser(null);
+    localStorage.removeItem('x_access_token');
+    localStorage.removeItem('x_refresh_token');
+    localStorage.removeItem('x_token_expiry');
+    await fetchUserStatus();
   };
 
   const exchangeCodeForToken = async (code) => {
     const codeVerifier = localStorage.getItem('code_verifier');
-    const cognitoToken = auth.user?.access_token; // Get Cognito JWT token
+    const cognitoToken = auth.user?.access_token;
 
-    // Call your backend to exchange the code for a token
     const response = await fetch('https://vm7pcq411e.execute-api.ap-south-1.amazonaws.com/connect', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${cognitoToken}`, // Add Cognito token
+        'Authorization': `Bearer ${cognitoToken}`,
       },
       body: JSON.stringify({
         code,
@@ -96,6 +144,7 @@ export const XAuthProvider = ({ children }) => {
 
     setUser(userData);
     setIsAuthenticated(true);
+    await fetchUserStatus();
   };
 
   const value = {
@@ -105,6 +154,7 @@ export const XAuthProvider = ({ children }) => {
     login,
     logout,
     exchangeCodeForToken,
+    fetchUserStatus,
   };
 
   return <XAuthContext.Provider value={value}>{children}</XAuthContext.Provider>;
