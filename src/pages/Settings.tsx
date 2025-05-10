@@ -15,6 +15,29 @@ const Settings = () => {
     }
   };
 
+  const handleDisconnectTwitter = async () => {
+    if (!isAuthenticated || !user?.id) return;
+
+    try {
+      // Make API call to delete the token from the tokens table
+      const response = await fetch('https://zhewfn3l0l.execute-api.ap-south-1.amazonaws.com/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to delete token');
+        return;
+      }
+
+      // Call logout to clear frontend state
+      await logout();
+    } catch (error) {
+      console.error('Error deleting token:', error);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
@@ -73,7 +96,7 @@ const Settings = () => {
               <p className="text-muted-foreground">Connect your Twitter account to enable posting.</p>
             )}
             <Button
-              onClick={isAuthenticated ? logout : handleConnectTwitter}
+              onClick={isAuthenticated ? handleDisconnectTwitter : handleConnectTwitter}
               className="neumorphic rounded-full active:pressed text-accent hover:text-accent border-0 hover:bg-transparent"
             >
               <Twitter className="h-4 w-4 mr-2" />
